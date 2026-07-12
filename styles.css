@@ -396,7 +396,63 @@ h2 { margin: 0; color: var(--burgundy); font-family: Georgia, var(--font-thai); 
 .payment-actions .button:first-child { grid-column: 1 / -1; }
 .security-note { margin: 1rem 0 0; color: var(--navy-soft); font-size: 0.75rem; }
 
-.slip-divider { height: 1px; margin: 1.5rem 0; background: var(--line); }
+.slip-open-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  padding: 0.25rem 0;
+  color: var(--burgundy);
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+.slip-open-link:hover { color: #5e2937; }
+.slip-open-link:focus-visible { outline: 3px solid rgba(36,54,75,0.28); outline-offset: 4px; }
+.slip-dialog {
+  width: min(calc(100% - 1.5rem), 520px);
+  max-height: min(90dvh, 760px);
+  padding: 0;
+  overflow: visible;
+  color: var(--navy);
+  border: 0;
+  border-radius: 1.2rem;
+  background: transparent;
+}
+.slip-dialog::backdrop { background: rgba(24,35,49,0.62); backdrop-filter: blur(3px); }
+.slip-dialog__panel {
+  position: relative;
+  max-height: min(90dvh, 760px);
+  padding: 1.5rem 1.25rem 1.25rem;
+  overflow-y: auto;
+  border: 1px solid rgba(113,51,67,0.16);
+  border-radius: 1.2rem;
+  background: var(--ivory);
+  box-shadow: 0 24px 70px rgba(24,35,49,0.3);
+}
+.slip-dialog__close {
+  position: absolute;
+  z-index: 2;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--navy-soft);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  cursor: pointer;
+}
+.slip-dialog__close:hover { color: var(--burgundy); background: white; }
+.slip-dialog__close:focus-visible { outline: 3px solid rgba(36,54,75,0.28); outline-offset: 3px; }
+.slip-dialog__close svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
 .slip-form { text-align: left; }
 .slip-form__heading { margin-bottom: 1rem; text-align: center; }
 .slip-form__heading p { margin: 0; }
