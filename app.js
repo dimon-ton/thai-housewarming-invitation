@@ -24,7 +24,16 @@ const CONFIG = {
   promptPayRecipient: "นายพิมล ตุ่นกระโทก",
   defaultAmount: "500",
   currency: "THB",
-  locale: "th-TH"
+  locale: "th-TH",
+
+  // Add the deployed Supabase submit-slip Edge Function URL here.
+  // It receives the guest name, slip, amount, event title, Turnstile token, and retry ID.
+  // If left blank, guests can send their name and slip with their phone's share sheet.
+  slipSubmissionUrl: "https://cenhvwhkpvthqyrqndgl.supabase.co/functions/v1/submit-slip",
+
+  // Public Cloudflare Turnstile site key. Required when slipSubmissionUrl is set.
+  // The matching secret key belongs only in Supabase Edge Function secrets.
+  turnstileSiteKey: "0x4AAAAAAD0RGv1VNoegOo_Y"
 };
 
 (function initializeInvitation() {
@@ -42,12 +51,31 @@ const CONFIG = {
     copyPayment: document.querySelector("#copy-payment-link"),
     copyPromptPayId: document.querySelector("#copy-promptpay-id"),
     idDisplay: document.querySelector("#promptpay-id-display"),
+    slipForm: document.querySelector("#slip-form"),
+    guestName: document.querySelector("#guest-name"),
+    guestNameError: document.querySelector("#guest-name-error"),
+    slipFile: document.querySelector("#slip-file"),
+    slipError: document.querySelector("#slip-error"),
+    slipPreview: document.querySelector("#slip-preview"),
+    slipPreviewImage: document.querySelector("#slip-preview-image"),
+    slipFileName: document.querySelector("#slip-file-name"),
+    slipFileSize: document.querySelector("#slip-file-size"),
+    removeSlip: document.querySelector("#remove-slip"),
+    slipSubmit: document.querySelector("#slip-submit"),
+    slipSubmitLabel: document.querySelector("#slip-submit-label"),
+    slipStatus: document.querySelector("#slip-status"),
+    slipDeliveryHelp: document.querySelector("#slip-delivery-help"),
+    turnstileContainer: document.querySelector("#turnstile-container"),
     toast: document.querySelector("#toast")
   };
 
   let currentPaymentUrl = "";
   let updateTimer;
   let toastTimer;
+  let previewUrl = "";
+  let turnstileWidgetId = null;
+  let turnstileToken = "";
+  let pendingSubmissionId = createSubmissionId();
 
   document.title = CONFIG.siteTitle;
   document.querySelectorAll("[data-config]").forEach((element) => {
@@ -194,6 +222,267 @@ const CONFIG = {
       "คัดลอกเลขอัตโนมัติไม่ได้ กรุณากดค้างที่หมายเลขเพื่อคัดลอก"
     );
   });
+
+  const slipSubmissionUrl = String(CONFIG.slipSubmissionUrl || "").trim();
+  const hasSlipEndpoint = /^https:\/\//i.test(slipSubmissionUrl);
+  const turnstileSiteKey = String(CONFIG.turnstileSiteKey || "").trim();
+  const maximumSlipSize = 5 * 1024 * 1024;
+  const acceptedSlipTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+  if (!hasSlipEndpoint) {
+    elements.slipSubmitLabel.textContent = "แชร์ชื่อและสลิป";
+    elements.slipDeliveryHelp.textContent = "กรอกชื่อและเลือกรูปสลิป จากนั้นเลือก LINE หรือแอปที่ต้องการส่งให้เจ้าภาพ";
+  } else if (!turnstileSiteKey) {
+    elements.slipSubmit.disabled = true;
+    elements.slipDeliveryHelp.textContent = "ระบบรับสลิปยังตั้งค่าไม่ครบ กรุณาแจ้งเจ้าภาพ";
+    showSlipFailure("กรุณาตั้งค่า turnstileSiteKey ใน app.js");
+  } else {
+    initializeTurnstile();
+  }
+
+  elements.slipFile.addEventListener("change", () => {
+    clearSlipError();
+    const file = elements.slipFile.files[0];
+    if (!file) {
+      hideSlipPreview();
+      return;
+    }
+
+    const errorMessage = validateSlipFile(file);
+    if (errorMessage) {
+      elements.slipError.textContent = errorMessage;
+      elements.slipFile.setAttribute("aria-invalid", "true");
+      elements.slipFile.value = "";
+      hideSlipPreview();
+      return;
+    }
+
+    showSlipPreview(file);
+  });
+
+  elements.removeSlip.addEventListener("click", () => {
+    elements.slipFile.value = "";
+    clearSlipError();
+    hideSlipPreview();
+    elements.slipFile.focus();
+  });
+
+  elements.slipForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    clearSlipFormMessages();
+
+    const guestName = elements.guestName.value.trim();
+    const file = elements.slipFile.files[0];
+    let firstInvalidElement = null;
+
+    if (!guestName) {
+      elements.guestNameError.textContent = "กรุณากรอกชื่อของคุณ";
+      elements.guestName.setAttribute("aria-invalid", "true");
+      firstInvalidElement = elements.guestName;
+    }
+
+    const slipValidationError = file ? validateSlipFile(file) : "กรุณาเลือกรูปสลิปโอนเงิน";
+    if (slipValidationError) {
+      elements.slipError.textContent = slipValidationError;
+      elements.slipFile.setAttribute("aria-invalid", "true");
+      firstInvalidElement ||= elements.slipFile;
+    }
+
+    if (firstInvalidElement) {
+      firstInvalidElement.focus();
+      return;
+    }
+
+    if (getValidatedAmount() === null) {
+      showSlipFailure("กรุณาตรวจสอบจำนวนเงินก่อนส่งหลักฐาน");
+      elements.amount.focus();
+      return;
+    }
+
+    if (hasSlipEndpoint && !turnstileToken) {
+      showSlipFailure("กรุณารอการตรวจสอบความปลอดภัย แล้วลองอีกครั้ง");
+      return;
+    }
+
+    setSlipSubmitting(true);
+    if (hasSlipEndpoint) {
+      await submitSlipToEndpoint(guestName, file);
+    } else {
+      await shareSlip(guestName, file);
+    }
+    setSlipSubmitting(false);
+  });
+
+  elements.guestName.addEventListener("input", () => {
+    elements.guestNameError.textContent = "";
+    elements.guestName.removeAttribute("aria-invalid");
+  });
+
+  function validateSlipFile(file) {
+    if (!acceptedSlipTypes.has(file.type)) return "กรุณาเลือกไฟล์รูป JPG, PNG หรือ WebP";
+    if (file.size > maximumSlipSize) return "รูปสลิปต้องมีขนาดไม่เกิน 5 MB";
+    return "";
+  }
+
+  function showSlipPreview(file) {
+    hideSlipPreview();
+    previewUrl = URL.createObjectURL(file);
+    elements.slipPreviewImage.src = previewUrl;
+    elements.slipFileName.textContent = file.name;
+    elements.slipFileSize.textContent = formatFileSize(file.size);
+    elements.slipPreview.hidden = false;
+  }
+
+  function hideSlipPreview() {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = "";
+    elements.slipPreviewImage.removeAttribute("src");
+    elements.slipPreview.hidden = true;
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024)).toLocaleString(CONFIG.locale)} KB`;
+    return `${(bytes / (1024 * 1024)).toLocaleString(CONFIG.locale, { maximumFractionDigits: 1 })} MB`;
+  }
+
+  function clearSlipError() {
+    elements.slipError.textContent = "";
+    elements.slipFile.removeAttribute("aria-invalid");
+  }
+
+  function clearSlipFormMessages() {
+    elements.guestNameError.textContent = "";
+    elements.slipError.textContent = "";
+    elements.slipStatus.textContent = "";
+    elements.slipStatus.className = "slip-status";
+    elements.guestName.removeAttribute("aria-invalid");
+    elements.slipFile.removeAttribute("aria-invalid");
+  }
+
+  function setSlipSubmitting(isSubmitting) {
+    elements.slipSubmit.disabled = isSubmitting;
+    elements.slipSubmitLabel.textContent = isSubmitting
+      ? "กำลังส่ง…"
+      : (hasSlipEndpoint ? "ส่งหลักฐานการโอน" : "แชร์ชื่อและสลิป");
+  }
+
+  async function submitSlipToEndpoint(guestName, file) {
+    const formData = new FormData();
+    formData.append("guestName", guestName);
+    formData.append("slip", file, file.name);
+    formData.append("amount", elements.amount.value.trim());
+    formData.append("eventTitle", CONFIG.heading);
+    formData.append("clientSubmissionId", pendingSubmissionId);
+    formData.append("turnstileToken", turnstileToken);
+
+    try {
+      const response = await fetch(slipSubmissionUrl, {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: formData
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || "ส่งหลักฐานไม่สำเร็จ");
+      showSlipSuccess(result.message || "ส่งชื่อและสลิปเรียบร้อยแล้ว ขอบพระคุณค่ะ/ครับ");
+      resetSlipForm();
+      pendingSubmissionId = createSubmissionId();
+    } catch (error) {
+      showSlipFailure(error.message || "ส่งหลักฐานไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง");
+    } finally {
+      resetTurnstile();
+    }
+  }
+
+  function initializeTurnstile() {
+    elements.turnstileContainer.hidden = false;
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.defer = true;
+    script.addEventListener("load", () => {
+      turnstileWidgetId = window.turnstile.render(elements.turnstileContainer, {
+        sitekey: turnstileSiteKey,
+        action: "slip-upload",
+        theme: "light",
+        size: "flexible",
+        callback: (token) => {
+          turnstileToken = token;
+          if (elements.slipStatus.classList.contains("is-error")) {
+            elements.slipStatus.textContent = "";
+            elements.slipStatus.className = "slip-status";
+          }
+        },
+        "expired-callback": () => {
+          turnstileToken = "";
+          showSlipFailure("การตรวจสอบหมดอายุ กรุณารอระบบตรวจสอบอีกครั้ง");
+        },
+        "error-callback": () => {
+          turnstileToken = "";
+          showSlipFailure("โหลดระบบตรวจสอบความปลอดภัยไม่สำเร็จ กรุณารีเฟรชหน้าเว็บ");
+        }
+      });
+    });
+    script.addEventListener("error", () => {
+      showSlipFailure("โหลดระบบตรวจสอบความปลอดภัยไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต");
+    });
+    document.head.appendChild(script);
+  }
+
+  function resetTurnstile() {
+    turnstileToken = "";
+    if (window.turnstile && turnstileWidgetId !== null) {
+      window.turnstile.reset(turnstileWidgetId);
+    }
+  }
+
+  function createSubmissionId() {
+    if (window.crypto && typeof window.crypto.randomUUID === "function") {
+      return window.crypto.randomUUID();
+    }
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (character) => {
+      const randomValue = Math.floor(Math.random() * 16);
+      const value = character === "x" ? randomValue : ((randomValue & 0x3) | 0x8);
+      return value.toString(16);
+    });
+  }
+
+  async function shareSlip(guestName, file) {
+    const amountText = elements.amount.value.trim()
+      ? ` จำนวน ${Number(elements.amount.value).toLocaleString(CONFIG.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท`
+      : "";
+    const shareData = {
+      title: `สลิปโอนเงินจาก ${guestName}`,
+      text: `${guestName} ส่งหลักฐานการโอนสำหรับงาน${CONFIG.heading}${amountText}`,
+      files: [file]
+    };
+
+    if (!navigator.share || (navigator.canShare && !navigator.canShare({ files: [file] }))) {
+      showSlipFailure("อุปกรณ์นี้ไม่รองรับการแชร์ไฟล์ กรุณาเปิดเว็บไซต์บนโทรศัพท์ หรือแจ้งเจ้าภาพเพื่อตั้งค่าระบบรับสลิป");
+      return;
+    }
+
+    try {
+      await navigator.share(shareData);
+      showSlipSuccess("เปิดเมนูแชร์แล้ว โปรดตรวจสอบว่าได้ส่งให้เจ้าภาพเรียบร้อย");
+    } catch (error) {
+      if (error.name !== "AbortError") showSlipFailure("ไม่สามารถเปิดเมนูแชร์ได้ กรุณาลองอีกครั้ง");
+    }
+  }
+
+  function showSlipSuccess(message) {
+    elements.slipStatus.textContent = message;
+    elements.slipStatus.className = "slip-status is-success";
+  }
+
+  function showSlipFailure(message) {
+    elements.slipStatus.textContent = message;
+    elements.slipStatus.className = "slip-status is-error";
+  }
+
+  function resetSlipForm() {
+    elements.slipForm.reset();
+    hideSlipPreview();
+  }
 
   async function copyPaymentUrl(successMessage) {
     if (getValidatedAmount() === null) {

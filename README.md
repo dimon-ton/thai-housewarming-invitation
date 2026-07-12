@@ -36,6 +36,16 @@ python -m http.server 8080
 
 QR Code ต้องใช้อินเทอร์เน็ตเพื่อโหลดรูปจาก PromptPay.io ส่วนเว็บไซต์ไม่มี build step และไม่มี dependency
 
+## การรับชื่อและสลิปโอนเงิน
+
+หน้าเว็บมีฟอร์มให้ผู้ร่วมงานกรอกชื่อและเลือกรูปสลิป (JPG, PNG หรือ WebP ไม่เกิน 5 MB)
+
+- หากยังไม่ตั้ง backend ปุ่มจะเปิดเมนูแชร์ของโทรศัพท์ เพื่อให้ผู้ร่วมงานส่งชื่อและรูปผ่าน LINE หรือแอปอื่น
+- backend ที่เตรียมไว้ใช้ Supabase Edge Function บันทึกข้อมูลลง Supabase PostgreSQL และเก็บรูปแบบ private ใน Google Drive
+- ทำตามคู่มือทีละขั้นตอนได้ที่ [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
+
+ระบบตรวจสอบชนิดและขนาดไฟล์ทั้งในเบราว์เซอร์และ Edge Function พร้อม Turnstile, CORS allowlist, rate limiting, RLS และ idempotency key
+
 ## เผยแพร่บน GitHub Pages
 
 1. สร้าง repository และอัปโหลดไฟล์ทั้งหมดไว้ที่ root ของ repository

@@ -11,3 +11,9 @@ desktop.ini
 ~$*
 .playwright-mcp/
 invitation-*.png
+
+# Local Supabase state and secrets
+.env
+.env.local
+supabase/.temp/
+supabase/functions/.env
