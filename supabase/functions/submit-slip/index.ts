@@ -73,6 +73,12 @@ Deno.serve(async (request: Request) => {
       }, 200, corsHeaders);
     }
 
+    const slipSha256 = await hashFile(slip);
+    const duplicateSubmission = await findSubmissionBySlipHash(slipSha256);
+    if (duplicateSubmission) {
+      throw new HttpError(409, "สลิปนี้ถูกส่งเข้าระบบแล้ว กรุณาอย่าส่งซ้ำ");
+    }
+
     const ipHash = await hashIpAddress(ipAddress);
     const allowedByRateLimit = await consumeRateLimit(ipHash);
     if (!allowedByRateLimit) {
@@ -91,6 +97,7 @@ Deno.serve(async (request: Request) => {
       original_filename: slip.name.slice(0, 255) || `slip.${extensionForMimeType(slip.type)}`,
       mime_type: slip.type,
       file_size: slip.size,
+      slip_sha256: slipSha256,
       event_title: eventTitle,
     });
 
@@ -200,6 +207,11 @@ async function hashIpAddress(ipAddress: string): Promise<string> {
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+async function hashFile(file: File): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", await file.arrayBuffer());
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 function supabaseHeaders(prefer?: string): HeadersInit {
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_SECRET_KEY");
   if (!serviceKey) throw new Error("Missing Supabase service role/secret key");
@@ -235,12 +247,27 @@ async function findSubmission(clientSubmissionId: string): Promise<{ id: string;
   return rows[0] || null;
 }
 
+async function findSubmissionBySlipHash(slipSha256: string): Promise<{ id: string } | null> {
+  const query = new URLSearchParams({
+    slip_sha256: `eq.${slipSha256}`,
+    select: "id",
+    limit: "1",
+  });
+  const response = await fetch(`${requireEnvironment("SUPABASE_URL")}/rest/v1/payment_submissions?${query}`, {
+    headers: supabaseHeaders(),
+  });
+  if (!response.ok) throw new Error(`Slip fingerprint lookup failed: ${response.status}`);
+  const rows = await response.json() as Array<{ id: string }>;
+  return rows[0] || null;
+}
+
 async function insertSubmission(values: JsonRecord): Promise<{ id: string; status: string }> {
   const response = await fetch(`${requireEnvironment("SUPABASE_URL")}/rest/v1/payment_submissions?select=id,status`, {
     method: "POST",
     headers: supabaseHeaders("return=representation"),
     body: JSON.stringify(values),
   });
+  if (response.status === 409) throw new HttpError(409, "สลิปนี้ถูกส่งเข้าระบบแล้ว กรุณาอย่าส่งซ้ำ");
   if (!response.ok) throw new Error(`Database insert failed: ${response.status}`);
   const rows = await response.json() as Array<{ id: string; status: string }>;
   if (!rows[0]) throw new Error("Database insert returned no row");
