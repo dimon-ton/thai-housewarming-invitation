@@ -44,7 +44,7 @@ QR Code ต้องใช้อินเทอร์เน็ตเพื่อ
 - backend ที่เตรียมไว้ใช้ Supabase Edge Function บันทึกข้อมูลลง Supabase PostgreSQL และเก็บรูปแบบ private ใน Google Drive
 - ทำตามคู่มือทีละขั้นตอนได้ที่ [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)
 
-ระบบตรวจสอบชนิดและขนาดไฟล์ทั้งในเบราว์เซอร์และ Edge Function พร้อม Turnstile, CORS allowlist, rate limiting, RLS และ idempotency key
+ระบบตรวจสอบชนิดและขนาดไฟล์ทั้งในเบราว์เซอร์และ Edge Function พร้อม Turnstile, CORS allowlist, rate limiting, RLS, idempotency key และ SHA-256 fingerprint เพื่อป้องกันการส่งรูปสลิปเดิมซ้ำ
 
 ## เผยแพร่บน GitHub Pages
 
