@@ -52,6 +52,9 @@ const CONFIG = {
     copyPromptPayId: document.querySelector("#copy-promptpay-id"),
     idDisplay: document.querySelector("#promptpay-id-display"),
     slipForm: document.querySelector("#slip-form"),
+    slipDialog: document.querySelector("#slip-dialog"),
+    openSlipDialog: document.querySelector("#open-slip-dialog"),
+    closeSlipDialog: document.querySelector("#close-slip-dialog"),
     guestName: document.querySelector("#guest-name"),
     guestNameError: document.querySelector("#guest-name-error"),
     slipFile: document.querySelector("#slip-file"),
@@ -75,6 +78,7 @@ const CONFIG = {
   let previewUrl = "";
   let turnstileWidgetId = null;
   let turnstileToken = "";
+  let turnstileInitialized = false;
   let pendingSubmissionId = createSubmissionId();
 
   document.title = CONFIG.siteTitle;
@@ -236,8 +240,6 @@ const CONFIG = {
     elements.slipSubmit.disabled = true;
     elements.slipDeliveryHelp.textContent = "ระบบรับสลิปยังตั้งค่าไม่ครบ กรุณาแจ้งเจ้าภาพ";
     showSlipFailure("กรุณาตั้งค่า turnstileSiteKey ใน app.js");
-  } else {
-    initializeTurnstile();
   }
 
   elements.slipFile.addEventListener("change", () => {
@@ -258,6 +260,18 @@ const CONFIG = {
     }
 
     showSlipPreview(file);
+  });
+
+  elements.openSlipDialog.addEventListener("click", () => {
+    elements.slipDialog.showModal();
+    if (hasSlipEndpoint && turnstileSiteKey && !turnstileInitialized) initializeTurnstile();
+    requestAnimationFrame(() => elements.guestName.focus());
+  });
+
+  elements.closeSlipDialog.addEventListener("click", () => elements.slipDialog.close());
+
+  elements.slipDialog.addEventListener("click", (event) => {
+    if (event.target === elements.slipDialog) elements.slipDialog.close();
   });
 
   elements.removeSlip.addEventListener("click", () => {
@@ -394,6 +408,7 @@ const CONFIG = {
   }
 
   function initializeTurnstile() {
+    turnstileInitialized = true;
     elements.turnstileContainer.hidden = false;
     const script = document.createElement("script");
     script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
@@ -423,6 +438,7 @@ const CONFIG = {
       });
     });
     script.addEventListener("error", () => {
+      turnstileInitialized = false;
       showSlipFailure("โหลดระบบตรวจสอบความปลอดภัยไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต");
     });
     document.head.appendChild(script);
