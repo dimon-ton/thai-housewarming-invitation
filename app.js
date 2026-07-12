@@ -19,7 +19,7 @@ const CONFIG = {
 
   // IMPORTANT: Replace this sample PromptPay ID before deployment.
   // This value will be visible in the public source code and QR image URL.
-  promptPayId: "1103100275320",
+  promptPayId: "0887263735",
 
   promptPayRecipient: "นายพิมล ตุ่นกระโทก",
   defaultAmount: "500",
