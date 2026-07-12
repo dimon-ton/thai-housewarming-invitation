@@ -1,0 +1,4 @@
+project_id = "new_home_merit"
+
+[functions.submit-slip]
+verify_jwt = false

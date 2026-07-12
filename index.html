@@ -153,6 +153,47 @@
             </button>
           </div>
           <p class="security-note">ตรวจสอบชื่อผู้รับและจำนวนเงินในแอปธนาคารทุกครั้งก่อนยืนยัน</p>
+
+          <div class="slip-divider" aria-hidden="true"></div>
+
+          <form class="slip-form" id="slip-form" novalidate>
+            <div class="slip-form__heading">
+              <p class="slip-form__kicker">แจ้งการโอนเงิน</p>
+              <h3>ส่งชื่อและสลิปโอนเงิน</h3>
+              <p id="slip-delivery-help">กรอกชื่อและเลือกรูปสลิปเพื่อส่งหลักฐานให้เจ้าภาพ</p>
+            </div>
+
+            <div class="form-field">
+              <label for="guest-name">ชื่อผู้ร่วมแสดงความยินดี</label>
+              <input class="text-control" id="guest-name" name="guestName" type="text" maxlength="100" autocomplete="name" placeholder="กรอกชื่อของคุณ" aria-describedby="guest-name-error" required>
+              <p class="field-error" id="guest-name-error" role="alert"></p>
+            </div>
+
+            <div class="form-field">
+              <label for="slip-file">รูปสลิปโอนเงิน</label>
+              <input class="file-control" id="slip-file" name="slip" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="slip-help slip-error" required>
+              <p class="field-help" id="slip-help">รองรับ JPG, PNG หรือ WebP ขนาดไม่เกิน 5 MB</p>
+              <p class="field-error" id="slip-error" role="alert"></p>
+            </div>
+
+            <div class="slip-preview" id="slip-preview" hidden>
+              <img id="slip-preview-image" alt="ตัวอย่างสลิปที่เลือก">
+              <div class="slip-preview__details">
+                <strong id="slip-file-name"></strong>
+                <span id="slip-file-size"></span>
+                <button id="remove-slip" type="button">เลือกรูปใหม่</button>
+              </div>
+            </div>
+
+            <div class="turnstile-container" id="turnstile-container" aria-label="การตรวจสอบความปลอดภัย" hidden></div>
+
+            <button class="button button--primary slip-submit" id="slip-submit" type="submit">
+              <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 13v6h14v-6"/></svg>
+              <span id="slip-submit-label">ส่งหลักฐานการโอน</span>
+            </button>
+            <p class="slip-status" id="slip-status" role="status" aria-live="polite"></p>
+            <p class="privacy-note">รูปสลิปอาจมีข้อมูลส่วนบุคคล โปรดตรวจสอบก่อนส่ง</p>
+          </form>
         </div>
       </section>
     </main>
