@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8efeb">
+  <meta name="description" content="คำเชิญร่วมพิธีทำบุญขึ้นบ้านใหม่ พร้อมแผนที่และช่องทางมอบของขวัญผ่าน PromptPay">
+  <title>พิธีทำบุญขึ้นบ้านใหม่</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">ข้ามไปยังเนื้อหา</a>
+
+  <div class="page-shell">
+    <header class="hero" aria-labelledby="event-heading">
+      <div class="paper-grain" aria-hidden="true"></div>
+      <svg class="botanical botanical--left" viewBox="0 0 230 410" aria-hidden="true">
+        <path class="stem" d="M31 398C72 315 57 231 113 156C142 117 174 86 190 34"/>
+        <path class="leaf" d="M70 306C18 296 10 256 20 225C59 239 83 263 70 306Z"/>
+        <path class="leaf leaf--light" d="M76 268C117 244 122 207 111 184C78 200 61 231 76 268Z"/>
+        <path class="leaf" d="M109 194C68 177 64 139 76 113C107 130 123 158 109 194Z"/>
+        <path class="leaf leaf--light" d="M135 140C170 130 182 99 177 75C145 84 126 110 135 140Z"/>
+        <g transform="translate(120 52) rotate(-10)">
+          <path class="tulip-stem" d="M12 116C11 78 15 51 23 29"/>
+          <path class="tulip tulip--pink" d="M22 40C3 34-5 15 3 0C13 6 18 14 22 24C28 13 36 6 47 1C54 18 43 36 22 40Z"/>
+        </g>
+        <g transform="translate(41 196) rotate(-22)">
+          <path class="tulip-stem" d="M11 104C11 74 13 44 21 24"/>
+          <path class="tulip tulip--white" d="M21 35C4 31-3 14 3 0C13 5 18 13 21 22C27 12 35 5 44 1C51 17 41 32 21 35Z"/>
+        </g>
+      </svg>
+
+      <svg class="botanical botanical--right" viewBox="0 0 230 410" aria-hidden="true">
+        <path class="stem" d="M31 398C72 315 57 231 113 156C142 117 174 86 190 34"/>
+        <path class="leaf" d="M70 306C18 296 10 256 20 225C59 239 83 263 70 306Z"/>
+        <path class="leaf leaf--light" d="M76 268C117 244 122 207 111 184C78 200 61 231 76 268Z"/>
+        <path class="leaf" d="M109 194C68 177 64 139 76 113C107 130 123 158 109 194Z"/>
+        <path class="leaf leaf--light" d="M135 140C170 130 182 99 177 75C145 84 126 110 135 140Z"/>
+        <g transform="translate(120 52) rotate(-10)">
+          <path class="tulip-stem" d="M12 116C11 78 15 51 23 29"/>
+          <path class="tulip tulip--pink" d="M22 40C3 34-5 15 3 0C13 6 18 14 22 24C28 13 36 6 47 1C54 18 43 36 22 40Z"/>
+        </g>
+        <g transform="translate(41 196) rotate(-22)">
+          <path class="tulip-stem" d="M11 104C11 74 13 44 21 24"/>
+          <path class="tulip tulip--white" d="M21 35C4 31-3 14 3 0C13 5 18 13 21 22C27 12 35 5 44 1C51 17 41 32 21 35Z"/>
+        </g>
+      </svg>
+
+      <div class="hero__content">
+        <p class="eyebrow" data-config="invitationText"></p>
+        <div class="ornament ornament--top" aria-hidden="true"><span>◆</span></div>
+        <h1 id="event-heading" data-config="heading"></h1>
+        <p class="host-name" data-config="hostName"></p>
+        <p class="description" data-config="description"></p>
+
+        <div class="date-panel" aria-label="วันและเวลาจัดงาน">
+          <p class="date-panel__label">กำหนดการ</p>
+          <p class="date-panel__date" data-config="eventDateLabel"></p>
+          <div class="time-row">
+            <div>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>
+              <span>เริ่มพิธี <strong data-config="eventTime"></strong></span>
+            </div>
+            <span class="time-row__divider" aria-hidden="true"></span>
+            <div>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v7M4 4v4c0 2 1.3 3 3 3s3-1 3-3V4M7 11v9M16 4v16M16 4c3 2 4 6 0 9"/></svg>
+              <span>ร่วมรับประทานอาหาร <strong data-config="mealTime"></strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ornament ornament--bottom" aria-hidden="true"><span>❦</span></div>
+        <p class="closing">ด้วยความยินดีและเป็นเกียรติอย่างยิ่ง</p>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <figure class="home-portrait">
+        <div class="home-portrait__frame">
+          <img src="assets/home.png" alt="บ้านใหม่สีขาวสำหรับจัดพิธีทำบุญขึ้นบ้านใหม่" width="1448" height="1086" loading="lazy" decoding="async">
+        </div>
+        <figcaption>
+          <span aria-hidden="true">❦</span>
+          <strong>บ้านแห่งความสุข</strong>
+          <small>ยินดีต้อนรับทุกท่านด้วยความอบอุ่น</small>
+        </figcaption>
+      </figure>
+
+      <section class="section location-section" aria-labelledby="location-heading">
+        <div class="section-heading">
+          <span class="section-heading__flourish" aria-hidden="true"></span>
+          <p class="section-heading__kicker">สถานที่จัดงาน</p>
+          <h2 id="location-heading">เดินทางมาร่วมงาน</h2>
+          <p class="address"><span data-config="addressLine1"></span><br><span data-config="addressLine2"></span></p>
+        </div>
+
+        <a class="button button--primary button--large" id="directions-link" href="#" target="_blank" rel="noopener noreferrer">
+          <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-12A7 7 0 1 0 5 9c0 5.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg>
+          <span>เปิดเส้นทางใน Google Maps</span>
+        </a>
+        <p class="hint">เปิดแอป Google Maps เพื่อดูเส้นทางแบบเลี้ยวต่อเลี้ยวจากตำแหน่งปัจจุบัน</p>
+      </section>
+
+      <section class="section gift-section" aria-labelledby="gift-heading">
+        <div class="section-heading">
+          <span class="section-heading__flourish" aria-hidden="true"></span>
+          <p class="section-heading__kicker">ของขวัญมงคล</p>
+          <h2 id="gift-heading">ร่วมแสดงความยินดี</h2>
+          <p>หากไม่สะดวกมาร่วมงาน สามารถส่งคำอวยพรและของขวัญผ่าน PromptPay ได้</p>
+        </div>
+
+        <div class="payment-card">
+          <div class="qr-frame">
+            <div class="qr-loader" id="qr-loader" aria-live="polite">กำลังสร้าง QR Code…</div>
+            <img id="promptpay-qr" alt="QR Code สำหรับชำระเงินผ่าน PromptPay" width="260" height="260">
+          </div>
+
+          <div class="recipient">
+            <p class="recipient__label">ชื่อผู้รับ</p>
+            <p class="recipient__name" data-config="promptPayRecipient"></p>
+            <p class="recipient__id"><span>เลข PromptPay</span> <strong id="promptpay-id-display"></strong></p>
+            <button class="recipient__copy" id="copy-promptpay-id" type="button">
+              <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="1.5"/><path d="M16 8V5H5v11h3"/></svg>
+              คัดลอกเลข PromptPay
+            </button>
+          </div>
+
+          <form class="amount-form" id="amount-form" novalidate>
+            <label for="amount">ระบุจำนวนเงิน <span>(ไม่บังคับ)</span></label>
+            <div class="amount-control">
+              <span aria-hidden="true">฿</span>
+              <input id="amount" name="amount" type="number" inputmode="decimal" min="0.01" max="999999.99" step="0.01" placeholder="0.00" autocomplete="off" aria-describedby="amount-help amount-error">
+              <span>บาท</span>
+            </div>
+            <p class="field-help" id="amount-help">QR Code จะอัปเดตตามจำนวนเงินที่ระบุ</p>
+            <p class="field-error" id="amount-error" role="alert"></p>
+          </form>
+
+          <div class="payment-actions" aria-label="ตัวเลือกสำหรับลิงก์ PromptPay">
+            <a class="button button--primary" id="open-payment-link" href="#" target="_blank" rel="noopener noreferrer">
+              <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 13v6H5V6h6"/></svg>
+              เปิดลิงก์
+            </a>
+            <button class="button button--secondary" id="share-payment-link" type="button">
+              <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg>
+              แชร์
+            </button>
+            <button class="button button--secondary" id="copy-payment-link" type="button">
+              <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="1.5"/><path d="M16 8V5H5v11h3"/></svg>
+              คัดลอก
+            </button>
+          </div>
+          <p class="security-note">ตรวจสอบชื่อผู้รับและจำนวนเงินในแอปธนาคารทุกครั้งก่อนยืนยัน</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <svg class="footer-flower" viewBox="0 0 160 52" aria-hidden="true"><path d="M80 49C79 32 79 19 80 6M80 30C64 29 59 20 58 13c13 1 21 7 22 17ZM80 38c16-1 22-9 23-16-13 0-22 6-23 16Z"/><path d="M80 10C70 9 66 3 68 0c6 2 10 5 12 8 2-4 6-7 12-8 2 4-2 9-12 10Z"/></svg>
+      <p>ขอบพระคุณที่มาร่วมเป็นส่วนหนึ่งของวันสำคัญ</p>
+      <p class="footer__date" data-config="eventDateShort"></p>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <noscript><div class="noscript">กรุณาเปิด JavaScript เพื่อแสดงแผนที่และ QR Code สำหรับ PromptPay</div></noscript>
+</body>
+</html>

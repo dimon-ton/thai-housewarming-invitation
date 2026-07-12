@@ -1,0 +1,13 @@
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Local server and temporary files
+*.log
+*.tmp
+~$*
+.playwright-mcp/
+invitation-*.png
