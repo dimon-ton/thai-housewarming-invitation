@@ -22,7 +22,7 @@ const CONFIG = {
   promptPayId: "0887263735",
 
   promptPayRecipient: "นายพิมล ตุ่นกระโทก",
-  defaultAmount: "500",
+  defaultAmount: "",
   currency: "THB",
   locale: "th-TH",
 
