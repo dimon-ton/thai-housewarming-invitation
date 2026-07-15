@@ -12,7 +12,7 @@ const CONFIG = {
   eventDateShort: "24 กรกฎาคม 2569",
   eventTime: "09:09 น.",
   mealTime: "12:00 น.",
-  addressLine1: "บ้านเลขที่ 129 ตำบล ทุ่งกุลา",
+  addressLine1: "บ้านเลขที่ 129 หมู่ที่ 5 ตำบล ทุ่งกุลา",
   addressLine2: "อำเภอ ท่าตูม จังหวัด สุรินทร์",
   latitude: 15.435534,
   longitude: 103.648366,
